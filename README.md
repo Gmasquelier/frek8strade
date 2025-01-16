@@ -35,10 +35,13 @@ spec:
       port: 8080
 ```
 
-To add a new bot, copy/paste the repository overlays/bot1, add a new strategy python file in the new repository, change strategy name accordingly in the kustomization.yaml file, and update suffix / common-label. 
+To add a new bot : 
+ - copy/paste the repository overlays/bot1
+ - add a new strategy python file in the new repository
+ - change strategy name accordingly in kustomization.yaml secretGenerator and configMapGenerator 
+ - change namesuffix and commonLabels 
 
 example : 
-
 ```
 nameSuffix: -bot3
 
@@ -65,7 +68,7 @@ resources:
 - overlays/namespace.yaml
 - overlays/bot1
 - overlays/bot2
-#[...]
+
 - overlays/bot3
 ```
 
