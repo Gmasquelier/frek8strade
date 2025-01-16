@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: freqtrade
+
+resources:
+- ingress.yaml
+- deployment.yaml
+
+configMapGenerator:
+- name: freqtrade-config
+  files:
+  - config.json=config.json
+- name: freqtrade-strategies
+  files: 
+  - sample_strategy.py
+
+secretGenerator:
+- name: freqtrade-secret
+  literals:
+  - FREQTRADE__STRATEGY=SampleStrategy
+  - FREQTRADE__API_SERVER__USERNAME=freqtrader
+  - FREQTRADE__API_SERVER__PASSWORD=changeit
+  - FREQTRADE__API_SERVER__ENABLED=true
+  #- FREQTRADE__TELEGRAM__ENABLED=true
+  #- FREQTRADE__TELEGRAM__CHAT_ID=
+  #- FREQTRADE__TELEGRAM__TOKEN=
+  #- FREQTRADE__EXCHANGE__KEY=
+  #- FREQTRADE__EXCHANGE__SECRET=
+  type: Opaque
+
+configurations:
+- nameReference.yaml

@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: freqtrade
+spec:
+  selector:
+    matchLabels:
+      app: freqtrade
+  template:
+    metadata:
+      labels:
+        app: freqtrade
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: freqtrade
+        image: freqtradeorg/freqtrade:stable
+        command:
+        - freqtrade
+        args:
+        - trade
+        - --config
+        - /freqtrade/config/config.json
+        - --db-url
+        - sqlite:////freqtrade/sqlite/tradesv3.sqlite
+        envFrom:
+        - secretRef:
+            name: freqtrade-secret
+        volumeMounts:
+        - mountPath: /freqtrade/config
+          name: config
+        - mountPath: /freqtrade/user_data/strategies
+          name: strategies
+        - mountPath: /freqtrade/sqlite
+          name: sqlite
+        ports:
+        - name: api
+          containerPort: 8080
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+          requests:
+            cpu: 200m
+            memory: 500Mi
+      volumes:
+      - name: config
+        configMap:
+          name: freqtrade-config
+      - name: strategies
+        configMap:
+          name: freqtrade-strategies
+      - name: sqlite
+        persistentVolumeClaim:
+          claimName: freqtrade-sqlite
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: freqtrade-sqlite
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: freqtrade
+  labels:
+    app: freqtrade
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: api
+    name: api
+  selector:
+    app: freqtrade

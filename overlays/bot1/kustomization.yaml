@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources: 
+- ../../base
+
+nameSuffix: -bot1
+
+commonLabels:
+  app: freqtrade-bot1
+
+secretGenerator:
+- name: freqtrade-secret
+  behavior: merge
+  literals:
+  - FREQTRADE__STRATEGY=Strategy001
+
+configMapGenerator:
+- name: freqtrade-strategies
+  behavior: replace
+  files: 
+  - Strategy001.py
+
+patches:
+  - path: ingress.yaml
+    target:
+      kind: HTTPRoute
